@@ -1,86 +1,59 @@
 package com.example.mycalculator;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.math.BigDecimal;
+public class MainActivity extends AppCompatActivity {
 
-
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    Button btn1, btn2, btn_clear, btn_plus, btn_equal;
-    TextView text_display;
-
-    // This is to evaluate the math expression
+    private TextView tvDisplay;
+    private StringBuilder input = new StringBuilder();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        tvDisplay = findViewById(R.id.tvDisplay);
 
-        btn1 = (Button) findViewById(R.id.btn1);
-        btn2 = (Button) findViewById(R.id.btn2);
-        btn_plus = (Button) findViewById(R.id.btn_plus);
-        btn_equal = (Button) findViewById(R.id.btn_equal);
-        btn_clear = (Button) findViewById(R.id.btn_clear);
-        text_display = (TextView) findViewById(R.id.textview_input_display);
+        // Digits
+        setDigit(R.id.btn0, "0");
+        setDigit(R.id.btn1, "1");
+        setDigit(R.id.btn2, "2");
+        setDigit(R.id.btn3, "3");
+        setDigit(R.id.btn4, "4");
+        setDigit(R.id.btn5, "5");
+        setDigit(R.id.btn6, "6");
+        setDigit(R.id.btn7, "7");
+        setDigit(R.id.btn8, "8");
+        setDigit(R.id.btn9, "9");
 
-        setClickListeners();
+        // Clear
+        findViewById(R.id.btnClear).setOnClickListener(v -> clearAll());
+
+        // (Ops & equals will come in later commits)
+        refresh();
     }
 
-    private void setClickListeners() {
-        btn1.setOnClickListener(this);
-        btn2.setOnClickListener(this);
-        btn_plus.setOnClickListener(this);
-        btn_equal.setOnClickListener(this);
-        btn_clear.setOnClickListener(this);
+    private void setDigit(int id, String d) {
+        Button b = findViewById(id);
+        b.setOnClickListener((View v) -> {
+            // avoid leading zeros like "00..."; keep single "0"
+            if (d.equals("0") && input.toString().equals("0")) return;
+            if (input.toString().equals("0") && !d.equals(".")) input.setLength(0);
+            input.append(d);
+            refresh();
+        });
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn1:
-                addNumber("1");
-                break;
-            case R.id.btn2:
-                addNumber("2");
-                break;
-            case R.id.btn_plus:
-                addNumber("+");
-                break;
-            case R.id.btn_equal:
-                String result = null;
-                try {
-                    result = evaluate(text_display.getText().toString());
-                    text_display.setText(result);
-                } catch (Exception e) {
-                    text_display.setText("Error");
-                }
-                break;
-            case R.id.btn_clear:
-                clear_display();
-                break;
-        }
+    private void clearAll() {
+        input.setLength(0);
+        tvDisplay.setText("0");
     }
 
-    private String evaluate(String expression) throws Exception {
-        String result = evaluate(expression);
-        BigDecimal decimal = new BigDecimal(result);
-        return decimal.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString();
-    }
-
-    private void addNumber(String number) {
-        text_display.setText(text_display.getText() + number);
-    }
-
-    private void clear_display() {
-        text_display.setText("");
+    private void refresh() {
+        tvDisplay.setText(input.length() == 0 ? "0" : input.toString());
     }
 }
