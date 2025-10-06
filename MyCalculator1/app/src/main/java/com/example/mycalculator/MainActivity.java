@@ -1,4 +1,6 @@
 package com.example.mycalculator;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,9 +11,6 @@ import android.widget.TextView;
 
 import java.math.BigDecimal;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -19,14 +18,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView text_display;
 
     // This is to evaluate the math expression
-    ScriptEngine engine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        engine = new ScriptEngineManager().getEngineByName("rhino");
 
         btn1 = (Button) findViewById(R.id.btn1);
         btn2 = (Button) findViewById(R.id.btn2);
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     result = evaluate(text_display.getText().toString());
                     text_display.setText(result);
-                } catch (ScriptException e) {
+                } catch (Exception e) {
                     text_display.setText("Error");
                 }
                 break;
@@ -73,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private String evaluate(String expression) throws ScriptException {
-        String result = engine.eval(expression).toString();
+    private String evaluate(String expression) throws Exception {
+        String result = evaluate(expression);
         BigDecimal decimal = new BigDecimal(result);
         return decimal.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString();
     }
