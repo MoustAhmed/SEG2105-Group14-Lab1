@@ -35,6 +35,35 @@ public class MainActivity extends AppCompatActivity {
         setDigit(R.id.btn8, "8");
         setDigit(R.id.btn9, "9");
 
+        // Dot
+        findViewById(R.id.btnDot).setOnClickListener(v -> {
+            if (input.indexOf(".") == -1) {
+                if (input.length() == 0) input.append("0");
+                input.append(".");
+                refresh();
+            }
+        });
+
+        // +/- toggle
+        findViewById(R.id.btnSign).setOnClickListener(v -> {
+            if (input.length() == 0) {
+                input.append("-");
+            } else if (input.charAt(0) == '-') {
+                input.deleteCharAt(0);
+            } else {
+                input.insert(0, '-');
+            }
+            refresh();
+        });
+
+        // Backspace
+        findViewById(R.id.btnBack).setOnClickListener(v -> {
+            if (input.length() > 0) {
+                input.deleteCharAt(input.length() - 1);
+                refresh();
+            }
+        });
+
         // Clear
         findViewById(R.id.btnClear).setOnClickListener(v -> clearAll());
 
@@ -46,8 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Equals
         findViewById(R.id.btnEquals).setOnClickListener(v -> onEquals());
-
-        refresh();
     }
 
     private void setDigit(int id, String d) {
@@ -63,7 +90,12 @@ public class MainActivity extends AppCompatActivity {
     private void selectOp(Op op) {
         Double number = parseInputOrNull();
         if (number != null) {
-            first = number;
+            if (first == null) {
+                first = number;
+            } else if (currentOp != Op.NONE) {
+                first = compute(first, number, currentOp);
+                tvDisplay.setText(formatResult(first));
+            }
             input.setLength(0);
         }
         currentOp = op;
@@ -74,18 +106,17 @@ public class MainActivity extends AppCompatActivity {
 
         Double second = parseInputOrNull();
         if (second == null) second = 0.0;
-
         double a = (first != null) ? first : 0.0;
         double b = second;
-        Double result = null;
 
+        Double result = null;
         switch (currentOp) {
             case ADD: result = a + b; break;
             case SUB: result = a - b; break;
             case MUL: result = a * b; break;
             case DIV:
                 if (b == 0.0) {
-                    tvDisplay.setText("Error");
+                    tvDisplay.setText("∞");
                     resetAfterResult();
                     return;
                 } else result = a / b;
@@ -93,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
             case NONE: break;
         }
 
-        if (result != null) tvDisplay.setText(String.valueOf(result));
+        if (result != null) tvDisplay.setText(formatResult(result));
         resetAfterResult();
     }
 
@@ -118,5 +149,20 @@ public class MainActivity extends AppCompatActivity {
         input.setLength(0);
         first = null;
         currentOp = Op.NONE;
+    }
+
+    private String formatResult(double v) {
+        if (v == Math.rint(v)) return String.valueOf((long) v);
+        return String.valueOf(v);
+    }
+
+    private Double compute(Double a, Double b, Op op) {
+        switch (op) {
+            case ADD: return a + b;
+            case SUB: return a - b;
+            case MUL: return a * b;
+            case DIV: return (b == 0.0) ? null : a / b;
+            default:  return b;
+        }
     }
 }
